@@ -1,0 +1,100 @@
+#fullpage.no-scroll {
+	overflow-y: hidden;
+	max-height: 100vh;
+}
+
+.section {
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-position: center;
+}
+
+.section.one {
+	background-image: url(https://cdn.glitch.global/5276d82a-7ef9-4685-82a8-b2bd150d122d/imagen_2022-04-23_233458709.png?v=1650771300548);
+}
+
+.section.two {
+	background-image: url(https://cdn.glitch.global/5276d82a-7ef9-4685-82a8-b2bd150d122d/2.avif?v=1650005828219);
+}
+
+.section.three {
+	background-image: url(https://cdn.glitch.global/5276d82a-7ef9-4685-82a8-b2bd150d122d/3.avif?v=1650005830848);
+}
+
+.section.four {
+	background-image: url(https://cdn.glitch.global/5276d82a-7ef9-4685-82a8-b2bd150d122d/4.avif?v=1650005833839);
+}
+
+.section.five {
+	background-image: url(https://cdn.glitch.global/5276d82a-7ef9-4685-82a8-b2bd150d122d/5.avif?v=1650005838243);
+}
+
+.section.six {
+	background-image: url(https://cdn.glitch.global/5276d82a-7ef9-4685-82a8-b2bd150d122d/6.avif?v=1650005842869);
+}
+
+.section.seven {
+	background-image: url(https://cdn.glitch.global/5276d82a-7ef9-4685-82a8-b2bd150d122d/7.avif?v=1650005849147);
+}
+
+.section__content {
+	position: absolute;
+	top: 20%;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 100%;
+	text-align: center;
+	text-transform: capitalize;
+	color: var(--primary-color);
+}
+
+.section__content__title {
+	font-size: 4rem;
+	font-weight: bold;
+	margin-bottom: 0.5rem;
+}
+
+.section__content__subtitle {
+	font-size: 1.5rem;
+	font-weight: 500;
+}
+
+.section__content__subtitle a {
+	color: inherit;
+}
+
+.section__content__subtitle a:hover {
+	text-decoration: underline;
+}
+
+.section__action__container {
+	position: absolute;
+	bottom: 15%;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 100%;
+	text-align: center;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+.section__action__btn {
+	font-size: 1.5rem;
+	font-weight: 500;
+	padding: 1rem;
+	border-radius: 2rem;
+	flex-basis: 80%;
+	margin-bottom: 1rem;
+	text-transform: capitalize;
+}
+
+.action__btn__primary {
+	background: rgba(23, 26, 42, 0.8);
+	color: white;
+}
+
+.action__btn__secondary {
+	background: rgba(255, 255, 255, 0.65);
+	color: var(--primary-color);
+}

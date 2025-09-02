@@ -1,0 +1,22 @@
+
+  .binding{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white;
+    width: 500px;
+    height: 600px;
+
+  }
+
+  .binding img{
+      width: 500px;
+      height: 600px;
+  } 
+
+  #img-center {
+   position: absolute;
+   top: 29%;
+   left: 32%;
+   transform: translate(-50% -50%);
+ }

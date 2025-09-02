@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiempo</title>
+    <link rel="stylesheet" href="nft/main2.css" type="text/css">
+    <link rel="stylesheet" href="nft/main.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://cdn.glitch.global/5276d82a-7ef9-4685-82a8-b2bd150d122d/apple-touch-icon.png?v=1670007402963">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://cdn.glitch.global/5276d82a-7ef9-4685-82a8-b2bd150d122d/favicon-32x32.png?v=1670007410446">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://cdn.glitch.global/5276d82a-7ef9-4685-82a8-b2bd150d122d/favicon-16x16.png?v=1670007408143">
+    <link rel="manifest" href="nft/site.webmanifest">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <div class="container">
+       <img src="https://cdn.glitch.com/5276d82a-7ef9-4685-82a8-b2bd150d122d%2Flogo%20blanco.png?v=1632919818312" class="logo">
+        <div class="content">
+            <p>Website Is Under Construction</p>
+            <h1>We're <span>Launching</span> Soon</h1>
+            <div class="launch-time">
+            <div>
+                <p id="days">00</p>
+                    <span>Days</span>
+            </div>
+            <div>
+                <p id="hours">00</p>
+                    <span>Hours</span>
+            </div>
+            <div>
+                <p id="minutes">00</p>
+                    <span>Minutes</span>
+            </div>
+            <div>
+                <p id="seconds">00</p>
+                    <span>Seconds</span>
+            </div>
+            </div>
+           
+            </div>
+            
+            </div>
+<script>
+    var countDownDate = new Date("Dec 21, 2022 00:00:00").getTime();
+    var x = setInterval(function(){
+        var now = new Date().getTime();
+     var distance = countDownDate - now; 
+
+     var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+     var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+     var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+     var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+     document.getElementById("days").innerHTML = days;
+     document.getElementById("hours").innerHTML = hours;
+     document.getElementById("minutes").innerHTML = minutes;
+     document.getElementById("seconds").innerHTML = seconds;
+
+     if(distance < 0){
+         clearInterval(x);
+         document.getElementById("days").innerHTML = 00;
+         document.getElementById("hours").innerHTML = 00;
+         document.getElementById("minutes").innerHTML = 00;
+         document.getElementById("seconds").innerHTML = 00;
+     }
+
+    
+
+    },1000);
+     
+
+
+</script>
+<footer>
+    <div class="footer-content">
+        <h3>Soon</h3>
+        
+        <ul class="socials">
+            <li><a href="https://www.facebook.com/profile.php?id=100073393806008"><i class="fa fa-facebook"></i></a></li>
+            <li><a href="https://twitter.com/MisterM30027495"><i class="fa fa-twitter"></i></a></li>
+            <li><a href="https://www.youtube.com/channel/UCBBZBHP7MzfJ8fHzm1B4CKw"><i class="fa fa-youtube"></i></a></li>
+            <li><a href="https://www.linkedin.com/in/mister-master-b12253222" ><i class="fa fa-linkedin-square"></i></a></li>
+        </ul>
+    </div>
+    <div class="footer-bottom">
+        <p>copyright &copy;2022 Mister Master. designed by <span>sensei#9242</span></p>
+    </div>
+</footer>
+</body>
+</html>
