@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calculadora simple</title>
+  <style>
+    :root{
+      --bg:#0f172a;        /* slate-900 */
+      --panel:#111827;     /* gray-900 */
+      --muted:#94a3b8;     /* slate-400 */
+      --text:#e5e7eb;      /* gray-200 */
+      --accent:#22c55e;    /* green-500 */
+      --accent-2:#4ade80;  /* green-400 */
+      --danger:#ef4444;    /* red-500 */
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:linear-gradient(180deg,#0b1023,#0f172a 30%,#0b1023);
+      color:var(--text);
+      font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial
+    }
+    .wrap{max-width:880px;margin:40px auto;padding:24px}
+    .card{
+      background:linear-gradient(180deg,#0b1229,#0b132d);
+      border:1px solid #1f2937;
+      border-radius:18px;
+      box-shadow:0 10px 30px rgba(0,0,0,.45)
+    }
+    .card h1{
+      margin:0;
+      padding:22px 24px;
+      border-bottom:1px solid #1f2937;
+      font-size:20px;
+      letter-spacing:.2px
+    }
+    .inner{padding:18px 20px}
+    .grid{display:grid;gap:14px;grid-template-columns:repeat(2,minmax(0,1fr))}
+    @media (max-width:680px){.grid{grid-template-columns:1fr}}
+    label{display:block;font-size:13px;color:var(--muted);margin:2px 2px 6px}
+    input[type="number"]{
+      width:100%;
+      background:#0b1023;
+      border:1px solid #263245;
+      color:var(--text);
+      padding:12px 12px;
+      border-radius:12px;
+      font-size:16px;
+      outline:none;
+      transition:.15s border
+    }
+    input[type="number"]:focus{border-color:#3b82f6}
+    .row{display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:6px}
+    .btn{
+      appearance:none;
+      border:1px solid #2a364a;
+      background:#0b1023;
+      color:#cbd5e1;
+      padding:10px 14px;
+      border-radius:12px;
+      cursor:pointer
+    }
+    .btn:hover{border-color:#3b82f6}
+    .result{
+      margin-top:18px;
+      padding:16px;
+      border:1px dashed #334155;
+      border-radius:14px;
+      background:#0b1023
+    }
+    .result .value{font-weight:700;font-size:28px}
+    .sub{font-size:13px;color:var(--muted);margin-top:6px}
+    .ok{color:var(--accent-2)}
+    .warn{color:var(--danger)}
+    .footer{margin-top:10px;font-size:12px;color:#8091ad}
+    .muted{color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Calculadora: total y por persona</h1>
+      <div class="inner">
+        <div class="grid">
+          <div>
+            <label for="cantidad">1) Cantidad de personas</label>
+            <input id="cantidad" type="number" min="0" step="1" placeholder="e.g., 4" />
+          </div>
+          <div>
+            <label for="monto">2) Monto por persona</label>
+            <input id="monto" type="number" min="0" step="0.01" placeholder="e.g., 19990" />
+          </div>
+          <div>
+            <label for="multiplicador">3) Multiplicador</label>
+            <input id="multiplicador" type="number" step="0.01" value="1" />
+          </div>
+          <div>
+            <label for="comision">4) Comisión (monto fijo a restar)</label>
+            <input id="comision" type="number" min="0" step="0.01" value="0" />
+          </div>
+        </div>
+        <div class="row">
+          <button class="btn" id="reset">Limpiar</button>
+        </div>
+
+        <div class="result" id="result">
+          <div class="muted">Resultado total</div>
+          <div class="value" id="total">—</div>
+          <div class="sub" id="formula">(cantidad × monto × multiplicador) − comisión</div>
+          <hr style="border:none;border-top:1px solid #1f2937;margin:12px 0">
+          <div class="muted">Por persona</div>
+          <div class="value" id="porPersona">—</div>
+          <div class="sub" id="nota"></div>
+        </div>
+        <div class="footer">Consejo: escribe números con decimales; el resultado se actualiza automáticamente.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const fmt = new Intl.NumberFormat('es-CL', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    const inputs = ['cantidad','monto','multiplicador','comision'].map($);
+    const totalEl = $('total');
+    const porPersonaEl = $('porPersona');
+    const formulaEl = $('formula');
+    const notaEl = $('nota');
+
+    function toNum(x){
+      const v = parseFloat(x);
+      return Number.isFinite(v) ? v : 0;
+    }
+
+    function calc(){
+      let cantidad = Math.max(0, Math.floor(toNum($('cantidad').value)));
+      let monto = Math.max(0, toNum($('monto').value));
+      let multiplicador = toNum($('multiplicador').value || '1');
+      let comision = Math.max(0, toNum($('comision').value));
+
+      const bruto = cantidad * monto * multiplicador;
+      const total = bruto - comision;
+      const porPersona = cantidad > 0 ? total / cantidad : 0;
+
+      totalEl.textContent = isFinite(total) ? fmt.format(total) : '—';
+      porPersonaEl.textContent = (cantidad > 0 && isFinite(porPersona)) ? fmt.format(porPersona) : '—';
+
+      formulaEl.textContent = `(${cantidad} × ${fmt.format(monto)} × ${fmt.format(multiplicador)}) − ${fmt.format(comision)} = ${fmt.format(total)}`;
+
+      if (cantidad === 0){
+        notaEl.textContent = 'Ingresa una cantidad de personas mayor a 0.';
+        notaEl.className = 'sub warn';
+      } else if (total < 0){
+        notaEl.textContent = 'Ojo: el total es negativo porque la comisión es mayor.';
+        notaEl.className = 'sub warn';
+      } else {
+        notaEl.textContent = 'OK';
+        notaEl.className = 'sub ok';
+      }
+    }
+
+    inputs.forEach(inp => inp.addEventListener('input', calc));
+    $('reset').addEventListener('click', () =>{
+      $('cantidad').value = '';
+      $('monto').value = '';
+      $('multiplicador').value = '1';
+      $('comision').value = '0';
+      calc();
+      $('cantidad').focus();
+    });
+
+    calc();
+  </script>
+</body>
+</html>
