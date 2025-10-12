@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Descargar por link</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root { --bg:#0f172a; --card:#111827; --text:#e5e7eb; --muted:#9ca3af; --acc:#22d3ee; }
+    body { margin:0; font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial; background:linear-gradient(120deg,#0b1020,#0f172a 35%,#0b1020); color:var(--text); min-height:100vh; display:grid; place-items:center; }
+    .wrap{ width:min(680px,90vw); background:linear-gradient(180deg,#111827,#0f172a); border:1px solid #1f2937; border-radius:20px; padding:28px; box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    h1{ font-size:1.35rem; margin:0 0 12px; letter-spacing:.3px }
+    p { color:var(--muted); margin:0 0 18px }
+    label{ font-size:.9rem; color:#cbd5e1; display:block; margin:12px 0 6px }
+    input[type="url"], input[type="text"]{
+      width:100%; padding:12px 14px; border-radius:12px; border:1px solid #334155; background:#0b1221; color:var(--text);
+      outline: none; box-shadow: inset 0 0 0 9999px rgba(255,255,255,.02);
+    }
+    .row{ display:grid; grid-template-columns:1fr auto; gap:10px; align-items:end; margin-top:10px }
+    button{
+      appearance:none; border:0; border-radius:12px; padding:12px 16px; font-weight:600; cursor:pointer; background:var(--acc); color:#04242a;
+      transition: transform .06s ease, filter .2s ease;
+    }
+    button:hover{ filter:brightness(1.05) }
+    button:active{ transform:translateY(1px) }
+    .btn-alt{ background:#1f2937; color:#e5e7eb; border:1px solid #334155 }
+    .status{ margin-top:14px; font-size:.92rem }
+    .bar{ height:10px; border-radius:8px; background:#0b1221; border:1px solid #1f2937; overflow:hidden; margin-top:10px }
+    .bar>i{ display:block; height:100%; width:0%; background:linear-gradient(90deg,#22d3ee,#60a5fa); transition:width .1s linear }
+    .tips{ margin-top:14px; font-size:.85rem; color:#94a3b8 }
+    .chips{ display:flex; gap:8px; flex-wrap:wrap; margin-top:8px }
+    .chip{ padding:6px 10px; border-radius:999px; background:#0b1221; border:1px solid #1f2937; color:#9ca3af; cursor:pointer }
+    code{ background:#0b1221; padding:2px 6px; border-radius:6px; border:1px solid #1f2937 }
+    .small{ font-size:.8rem; color:#9ca3af; margin-top:8px }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Descargar archivo desde un link</h1>
+    <p>Pega cualquier URL. Intentaremos descargarlo en el navegador. Si el servidor bloquea CORS, prueba el botón <b>Enlace directo</b> o usa el proxy (ver más abajo).</p>
+
+    <label for="url">URL del archivo</label>
+    <input type="url" id="url" placeholder="https://ejemplo.com/archivo.pdf" spellcheck="false" />
+
+    <div class="row">
+      <div>
+        <label for="name">Nombre de salida (opcional)</label>
+        <input type="text" id="name" placeholder="archivo.pdf (auto si vacío)" />
+      </div>
+      <div style="display:flex;gap:8px">
+        <button id="btnFetch">Descargar seguro</button>
+        <button id="btnDirect" class="btn-alt" title="Abre el enlace tal cual">Enlace directo</button>
+      </div>
+    </div>
+
+    <div class="status" id="status"></div>
+    <div class="bar"><i id="bar"></i></div>
+
+    <div class="tips">
+      <div class="chips" id="chips"></div>
+      <p class="small">Nota: el modo “Descargar seguro” usa <code>fetch</code> y necesita que el servidor permita CORS. Si no, prueba “Enlace directo” (puede abrir el archivo en el navegador) o instala el proxy de 10 líneas que te dejo abajo.</p>
+    </div>
+  </div>
+
+  <script>
+    const $ = (s)=>document.querySelector(s);
+    const bar = $('#bar'), st = $('#status'), urlInput = $('#url'), nameInput = $('#name');
+
+    const samples = [
+      'https://example-files.online-convert.com/document/pdf/example.pdf',
+      'https://file-examples.com/storage/fe7b3d0f1fa2fca7a5e3e4b/2017/10/file-sample_150kB.pdf',
+      'https://speed.hetzner.de/100MB.bin'
+    ];
+    const chipBox = $('#chips');
+    samples.forEach(u=>{
+      const c = document.createElement('button');
+      c.className = 'chip';
+      c.textContent = new URL(u).hostname.replace('www.','')+'…';
+      c.title = u;
+      c.onclick = ()=>{ urlInput.value=u; st.textContent=''; bar.style.width='0%'; };
+      chipBox.appendChild(c);
+    });
+
+    function setStatus(t){ st.textContent = t; }
+    function setProg(p){ bar.style.width = (p*100).toFixed(1)+'%'; }
+
+    function guessName(u, preferred){
+      if (preferred?.trim()) return preferred.trim();
+      try{
+        const n = decodeURIComponent(new URL(u).pathname.split('/').pop()||'');
+        return n || 'descarga';
+      }catch{ return 'descarga'; }
+    }
+    async function downloadFetch(url, outName){
+      setStatus('Conectando…'); setProg(0);
+      const res = await fetch(url, { mode: 'cors' }); 
+      if (!res.ok) throw new Error('HTTP '+res.status+' '+res.statusText);
+
+      const total = Number(res.headers.get('content-length')) || 0;
+      const reader = res.body?.getReader?.();
+      if (!reader){
+        const blob = await res.blob();
+        triggerSave(blob, outName); setProg(1); setStatus('Descarga lista.');
+        return;
+      }
+
+      const chunks = [];
+      let received = 0;
+      while (true){
+        const {done, value} = await reader.read();
+        if (done) break;
+        chunks.push(value);
+        received += value.length;
+        if (total) setProg(received/total);
+        else setProg(Math.min(0.9, bar.style.width.replace('%','')/100 + 0.02));
+      }
+      const blob = new Blob(chunks, { type: res.headers.get('content-type') || 'application/octet-stream' });
+      triggerSave(blob, outName);
+      setProg(1); setStatus('Descarga completada.');
+    }
+
+    function triggerSave(blob, filename){
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename || 'descarga';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(a.href), 30000);
+    }
+
+    function directLink(url){
+      const a = document.createElement('a');
+      a.href = url; a.rel="noopener"; a.target = "_blank";
+      a.download = guessName(url, nameInput.value);
+      document.body.appendChild(a); a.click(); a.remove();
+    }
+
+    $('#btnFetch').onclick = async ()=>{
+      const url = urlInput.value.trim();
+      if (!url){ return setStatus('Por favor pega un URL.'); }
+      try {
+        await downloadFetch(url, guessName(url, nameInput.value));
+      } catch (e){
+        console.error(e);
+        setStatus('No se pudo descargar con fetch (posible CORS o bloqueo). Prueba "Enlace directo" o usa el proxy.');
+      }
+    };
+
+    $('#btnDirect').onclick = ()=>{
+      const url = urlInput.value.trim();
+      if (!url){ return setStatus('Por favor pega un URL.'); }
+      setStatus('Abriendo el enlace directamente…');
+      directLink(url);
+    };
+  </script>
+</body>
+</html>
