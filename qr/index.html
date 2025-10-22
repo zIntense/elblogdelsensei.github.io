@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Generador de QR</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0f172a; --panel:#111827; --ink:#e5e7eb; --muted:#94a3b8; --accent:#22d3ee; --accent-2:#38bdf8; --danger:#f87171;
+      --ring: 0 0 0 3px rgba(34,211,238,.25);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      background: radial-gradient(1200px 800px at 20% -10%, #0b1220 0%, var(--bg) 40%), linear-gradient(180deg, #0b1220 0%, #0a0f1c 100%);
+      color:var(--ink); display:grid; place-items:center; padding:24px;
+    }
+    .card{
+      width:100%; max-width:880px; background:linear-gradient(180deg,#0c1220 0%, var(--panel) 100%);
+      border:1px solid #1f2937; border-radius:18px; padding:24px; box-shadow:0 20px 60px rgba(0,0,0,.35);
+    }
+    h1{margin:0 0 8px; font-size:24px; letter-spacing:.2px}
+    p.desc{margin:0 0 20px; color:var(--muted)}
+    .grid{display:grid; gap:16px; grid-template-columns:1.2fr .8fr}
+    @media (max-width:800px){ .grid{grid-template-columns:1fr} }
+    label{display:block; font-size:13px; color:var(--muted); margin-bottom:6px}
+    input[type="text"]{
+      width:100%; padding:12px 14px; border-radius:12px; border:1px solid #243145; background:#0b1424; color:var(--ink);
+      outline:none; transition:.2s border-color, .2s box-shadow;
+    }
+    input[type="text"]:focus{ border-color:#2dd4bf; box-shadow:var(--ring) }
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    select, input[type="number"]{
+      width:100%; padding:10px 12px; border-radius:10px; border:1px solid #243145; background:#0b1424; color:var(--ink);
+      outline:none; transition:.2s border-color, .2s box-shadow;
+    }
+    select:focus, input[type="number"]:focus{ border-color:#38bdf8; box-shadow:var(--ring) }
+    .actions{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px}
+    button{
+      appearance:none; border:none; padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600; color:#061018;
+      background:linear-gradient(180deg, var(--accent) 0%, var(--accent-2) 100%); transition:transform .06s ease, opacity .2s ease;
+    }
+    button:hover{opacity:.95}
+    button:active{transform:translateY(1px)}
+    button.secondary{background:#0b1424; color:var(--ink); border:1px solid #22324b}
+    button.danger{background:linear-gradient(180deg, #fb7185 0%, #ef4444 100%); color:white}
+    .preview{
+      background:#0b1424; border:1px dashed #22324b; border-radius:12px; min-height:320px; display:grid; place-items:center; padding:16px;
+    }
+    .hint{font-size:12px; color:var(--muted); margin-top:4px}
+    .row-small{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+    .error{color:var(--danger); font-size:13px; margin-top:8px; display:none}
+    footer{margin-top:18px; color:var(--muted); font-size:12px}
+    .pill{display:inline-flex; align-items:center; gap:6px; background:#0b1424; border:1px solid #22324b; padding:6px 10px; border-radius:999px}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12px}
+  </style>
+  <!-- Librería ligera para generar QR (canvas) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+</head>
+<body>
+  <main class="card">
+    <h1>Generador de Código QR</h1>
+    <p class="desc">Pega tu enlace, ajusta tamaño y nivel de corrección, y descarga el QR como imagen PNG.</p>
+
+    <div class="grid">
+      <!-- Columna izquierda: controles -->
+      <section>
+        <label for="url">Enlace / Texto</label>
+        <input id="url" type="text" placeholder="https://ejemplo.com o cualquier texto…" />
+        <div class="hint">Consejo: incluye <span class="pill"><span class="mono">https://</span></span> para que los teléfonos lo abran como link.</div>
+
+        <div class="row" style="margin-top:12px">
+          <div>
+            <label for="size">Tamaño (px)</label>
+            <input id="size" type="number" min="128" max="1024" step="8" value="320" />
+          </div>
+          <div>
+            <label for="margin">Margen (módulos)</label>
+            <input id="margin" type="number" min="0" max="8" step="1" value="2" />
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px">
+          <div>
+            <label for="ec">Corrección de error</label>
+            <select id="ec">
+              <option value="L">L (7%)</option>
+              <option value="M" selected>M (15%)</option>
+              <option value="Q">Q (25%)</option>
+              <option value="H">H (30%)</option>
+            </select>
+          </div>
+          <div>
+            <label for="nombre">Nombre de archivo</label>
+            <input id="nombre" type="text" placeholder="mi-qr" value="mi-qr" />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="btnGen">Generar QR</button>
+          <button id="btnDesc" class="secondary" disabled>Descargar PNG</button>
+          <button id="btnCopiar" class="secondary" disabled>Copiar imagen</button>
+          <button id="btnLimpiar" class="danger">Limpiar</button>
+        </div>
+        <div id="err" class="error">Ingresa un enlace o texto válido.</div>
+      </section>
+
+      <!-- Columna derecha: preview -->
+      <section>
+        <label>Vista previa</label>
+        <div id="preview" class="preview">
+          <div style="text-align:center; color:#7a8aa6">
+            <div style="font-size:42px; line-height:1">▢</div>
+            <div style="margin-top:8px">Aún no hay QR</div>
+          </div>
+        </div>
+        <footer>
+          Escanea con tu teléfono para probarlo. Los niveles altos de corrección hacen el QR más “denso” pero más resistente a daños.
+        </footer>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // Esperar a que cargue la librería
+    window.addEventListener('load', () => {
+      const $ = (s) => document.querySelector(s);
+      const url = $('#url');
+      const size = $('#size');
+      const ec = $('#ec');
+      const margin = $('#margin');
+      const nombre = $('#nombre');
+      const err = $('#err');
+      const preview = $('#preview');
+      const btnGen = $('#btnGen');
+      const btnDesc = $('#btnDesc');
+      const btnCopiar = $('#btnCopiar');
+      const btnLimpiar = $('#btnLimpiar');
+
+      let qrInstance = null;
+
+      const EC_MAP = { L: QRCode.CorrectLevel.L, M: QRCode.CorrectLevel.M, Q: QRCode.CorrectLevel.Q, H: QRCode.CorrectLevel.H };
+
+      function vaciarPreview(){
+        preview.innerHTML = `
+          <div style="text-align:center; color:#7a8aa6">
+            <div style="font-size:42px; line-height:1">▢</div>
+            <div style="margin-top:8px">Aún no hay QR</div>
+          </div>`;
+        btnDesc.disabled = true;
+        btnCopiar.disabled = true;
+        qrInstance = null;
+      }
+
+      function validarTexto(t){
+        if(!t) return false;
+        // Permite texto libre o URL con protocolo. No rechazamos texto sin protocolo.
+        return String(t).trim().length > 0;
+      }
+
+      function generar(){
+        const t = url.value.trim();
+        const w = Math.min(1024, Math.max(128, parseInt(size.value || 320, 10)));
+        const m = Math.min(8, Math.max(0, parseInt(margin.value || 2, 10)));
+        const level = EC_MAP[ec.value] ?? QRCode.CorrectLevel.M;
+
+        if(!validarTexto(t)){
+          err.style.display = 'block';
+          vaciarPreview();
+          return;
+        }
+        err.style.display = 'none';
+
+        // Limpia y crea contenedor
+        preview.innerHTML = '';
+        const holder = document.createElement('div');
+        preview.appendChild(holder);
+
+        // Generar QR
+        qrInstance = new QRCode(holder, {
+          text: t,
+          width: w,
+          height: w,
+          colorDark: "#e5e7eb",
+          colorLight: "#0b1424",
+          correctLevel: level
+        });
+
+        // Ajustar margen: QRCode.js no tiene margen nativo; simulamos con padding
+        holder.style.padding = `${m * 4}px`;
+
+        // Habilitar acciones cuando el canvas esté listo (pequeño delay)
+        setTimeout(() => {
+          btnDesc.disabled = false;
+          btnCopiar.disabled = false;
+        }, 50);
+      }
+
+      function canvasActual(){
+        if(!qrInstance) return null;
+        // QRCode.js puede renderizar como <img> o <canvas>; forzamos a usar el canvas si existe
+        const c = preview.querySelector('canvas');
+        if (c) return c;
+
+        // Si solo hay <img>, copiamos su bitmap a un canvas para poder descargar/copiar
+        const img = preview.querySelector('img');
+        if(!img) return null;
+        const cvs = document.createElement('canvas');
+        cvs.width = img.naturalWidth || img.width;
+        cvs.height = img.naturalHeight || img.height;
+        const ctx = cvs.getContext('2d');
+        ctx.fillStyle = "#0b1424";
+        ctx.fillRect(0,0,cvs.width,cvs.height);
+        ctx.drawImage(img,0,0);
+        return cvs;
+      }
+
+      function descargar(){
+        const c = canvasActual();
+        if(!c) return;
+        const a = document.createElement('a');
+        const base = (nombre.value || 'mi-qr').trim().replace(/[^\w\-]+/g,'-').replace(/\-+/g,'-');
+        a.download = (base || 'mi-qr') + '.png';
+        a.href = c.toDataURL('image/png');
+        a.click();
+      }
+
+      async function copiarImagen(){
+        try{
+          const c = canvasActual();
+          if(!c) return;
+          c.toBlob(async (blob) => {
+            if(!blob) return;
+            const item = new ClipboardItem({ "image/png": blob });
+            await navigator.clipboard.write([item]);
+            btnCopiar.textContent = '¡Copiado!';
+            setTimeout(()=> btnCopiar.textContent='Copiar imagen', 1200);
+          }, 'image/png');
+        }catch(e){
+          btnCopiar.textContent = 'No soportado :(';
+          setTimeout(()=> btnCopiar.textContent='Copiar imagen', 1200);
+        }
+      }
+
+      function limpiar(){
+        url.value = '';
+        nombre.value = 'mi-qr';
+        size.value = 320;
+        margin.value = 2;
+        ec.value = 'M';
+        err.style.display = 'none';
+        vaciarPreview();
+        url.focus();
+      }
+
+      // Eventos
+      btnGen.addEventListener('click', generar);
+      btnDesc.addEventListener('click', descargar);
+      btnCopiar.addEventListener('click', copiarImagen);
+      btnLimpiar.addEventListener('click', limpiar);
+
+      // Enter para generar
+      url.addEventListener('keydown', (e)=> { if(e.key==='Enter') generar(); });
+
+      // Estado inicial
+      vaciarPreview();
+    });
+  </script>
+</body>
+</html>
