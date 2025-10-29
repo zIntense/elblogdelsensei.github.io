@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Descargas</title>
+  <style>
+    :root { --bg:#0f172a; --card:#111827; --fg:#e5e7eb; --accent:#22d3ee; --muted:#9ca3af; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100dvh; display: grid; place-items: center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      background: radial-gradient(1200px 800px at 70% -10%, #1f2937 0%, #0b1022 40%, var(--bg) 100%);
+      color: var(--fg);
+    }
+    .wrap { width: min(920px, 92vw); }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px; padding: 22px; box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      backdrop-filter: blur(6px);
+    }
+    h1 { font-size: clamp(1.2rem, 2.3vw, 1.8rem); margin: 0 0 14px; font-weight: 700; letter-spacing: .2px; }
+    p  { margin: 0 0 14px; color: var(--muted); }
+    .gate { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 12px; }
+    input[type="password"], input[type="text"] {
+      width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,.14);
+      background: #0b1224; color: var(--fg); outline: none;
+    }
+    input::placeholder { color: #6b7280; }
+    .btn {
+      -webkit-tap-highlight-color: transparent;
+      border: 0; border-radius: 12px; padding: 12px 16px; cursor: pointer; font-weight: 700;
+      color: #081018; background: linear-gradient(180deg, #67e8f9, #22d3ee);
+      box-shadow: 0 8px 18px rgba(34,211,238,.25);
+    }
+    .btn[disabled] { opacity: .6; cursor: not-allowed; box-shadow: none; }
+    #buttons-section { display: none; margin-top: 18px; }
+    .grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px; margin-top: 14px;
+    }
+    .dl-btn {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      border: 1px solid rgba(255,255,255,.12); background: #0d162d; color: var(--fg);
+      padding: 12px 14px; border-radius: 14px; cursor: pointer; font-weight: 600;
+      transition: transform .08s ease, border-color .15s ease, background .15s ease;
+    }
+    .dl-btn:hover { transform: translateY(-1px); border-color: rgba(34,211,238,.5); background: #0f1b36; }
+    .tag { font-size: 12px; padding: 2px 8px; border: 1px solid rgba(255,255,255,.14); border-radius: 999px; color: var(--muted); }
+    .ok { color: #10b981; }
+    .warn { color: #f59e0b; }
+    .footer { margin-top: 12px; font-size: 12px; color: var(--muted); }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card" id="gate-card" aria-labelledby="title">
+      <h1 id="title">Acceso</h1>
+      <p>Escribe la palabra clave para ver las descargas.</p>
+      <div class="gate">
+        <input id="keyInput" type="password" inputmode="text" autocomplete="off" placeholder="Palabra clave" aria-label="Palabra clave" />
+        <button id="enterBtn" class="btn" type="button">Entrar</button>
+      </div>
+      <p id="msg" class="footer" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="card" id="buttons-section" aria-labelledby="dl-title">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+        <h1 id="dl-title">Descargas</h1>
+        <span class="tag">Cada botón busca su URL</span>
+      </div>
+      <p class="footer">
+        Sube tu archivo de índice (texto) a cualquier hosting accesible por HTTP/HTTPS. Una línea por botón (Base64) o formato <code>N=Base64</code>.
+      </p>
+
+      <div id="buttonsGrid" class="grid" role="list">
+        <button class="dl-btn" role="listitem" data-line="1">⬇️ Pragmatismo</button>
+        <button class="dl-btn" role="listitem" data-line="2">⬇️ Pragmatismo 2</button>
+        <button class="dl-btn" role="listitem" data-line="3">⬇️ Sin uso</button>
+      </div>
+
+      <p id="hint" class="footer">
+        <span class="ok">✔</span> Si quieres abrir en nueva pestaña, puedo ajustarlo.  
+        <span class="warn">⚠</span> Asegúrate que el servidor del índice permita CORS si está en otro dominio (o sirve el índice desde el mismo origen).
+      </p>
+    </section>
+  </main>
+
+  <script>
+    (function() {
+      const HASH = "4205501b2d802fd46d82e42f1e87718fe13ddd49816614655c0a43ddd34d664e";
+      const INDEX_URL = "https://zintense.github.io/elblogdelsensei.github.io/app/Demas/src/css/test.txt";
+      const keyInput = document.getElementById("keyInput");
+      const enterBtn = document.getElementById("enterBtn");
+      const msg = document.getElementById("msg");
+      const section = document.getElementById("buttons-section");
+      const grid = document.getElementById("buttonsGrid");
+      async function sha256Hex(text) {
+        const enc = new TextEncoder().encode(text);
+        const buf = await crypto.subtle.digest("SHA-256", enc);
+        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+      }
+      function lineToUrl(rawLine) {
+        if (!rawLine) return "";
+        let s = String(rawLine).replace(/^\uFEFF/, "").trim();
+        if (/^https?:\/\//i.test(s)) return s;
+        const eq = s.indexOf("=");
+        if (eq > -1 && !/^[A-Za-z0-9+/=_-]+$/.test(s.slice(0, eq))) {
+          s = s.slice(eq + 1).trim();
+        }
+        s = s.replace(/\s+/g, "");
+        s = s.replace(/-/g, "+").replace(/_/g, "/");
+        while (s.length % 4 !== 0) s += "=";
+        try {
+          let decoded = atob(s).trim().replace(/^\uFEFF/, "");
+          decoded = decoded.replace(/^["']|["']$/g, "").trim();
+          try {
+            const maybeObj = JSON.parse(decoded);
+            if (maybeObj && typeof maybeObj.url === "string") {
+              decoded = maybeObj.url;
+            }
+          } catch {}
+          return /^https?:\/\//i.test(decoded) ? decoded : "";
+        } catch {
+          return "";
+        }
+      }
+      function parseIndex(text) {
+        const raw = (text || "").replace(/\r\n/g, "\n").split("\n");
+        const lines = [];
+        lines[0] = null;
+        for (let i = 0; i < raw.length; i++) {
+          let line = raw[i].trim();
+          if (!line || line.startsWith("#") || line.startsWith("//")) {
+            lines.push("");
+            continue;
+          }
+          lines.push(line);
+        }
+        return lines;
+      }
+      function redirectTo(url) {
+        window.location.href = url;
+      }
+      let cachedIndex = null; 
+
+      async function ensureIndexLoaded() {
+        if (cachedIndex && Date.now() - cachedIndex.fetchedAt < 60_000) return cachedIndex;
+        const res = await fetch(INDEX_URL, { mode: "cors" });
+        if (!res.ok) throw new Error("No se pudo leer el índice (" + res.status + ")");
+        const txt = await res.text();
+        cachedIndex = { lines: parseIndex(txt), fetchedAt: Date.now() };
+        return cachedIndex;
+      }
+      async function validate() {
+        const val = (keyInput.value || "").trim().toLowerCase();
+        const digest = await sha256Hex(val);
+        if (digest === HASH) {
+          section.style.display = "block";
+          msg.textContent = "Acceso concedido.";
+          keyInput.disabled = true;
+          enterBtn.disabled = true;
+          const firstBtn = grid.querySelector(".dl-btn");
+          if (firstBtn) firstBtn.focus();
+        } else {
+          msg.textContent = "Palabra incorrecta.";
+        }
+      }
+
+      enterBtn.addEventListener("click", validate);
+      keyInput.addEventListener("keydown", (e) => { if (e.key === "Enter") validate(); });
+      grid.addEventListener("click", async (e) => {
+        const btn = e.target.closest(".dl-btn");
+        if (!btn) return;
+
+        const lineNum = parseInt(btn.getAttribute("data-line"), 10);
+        if (!Number.isInteger(lineNum) || lineNum <= 0) {
+          alert("Botón sin 'data-line' válido.");
+          return;
+        }
+
+        try {
+          const idx = await ensureIndexLoaded();
+          const rawLine = idx.lines[lineNum] || "";
+          if (!rawLine) {
+            alert("No hay contenido en la línea " + lineNum);
+            return;
+          }
+          const url = lineToUrl(rawLine);
+          if (!url) {
+            alert("La línea " + lineNum + " no decodifica a una URL válida.");
+            console.debug("Contenido crudo de la línea", lineNum, "=", rawLine);
+            return;
+          }
+          redirectTo(url);
+        } catch (err) {
+          console.error(err);
+          alert("No se pudo obtener el índice o decodificar la URL.");
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
+
