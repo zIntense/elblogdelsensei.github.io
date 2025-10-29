@@ -81,30 +81,36 @@
       </div>
 
       <p id="hint" class="footer">
-        <span class="ok">✔</span> Si quieres abrir en nueva pestaña, puedo ajustarlo.  
-        <span class="warn">⚠</span> Asegúrate que el servidor del índice permita CORS si está en otro dominio (o sirve el índice desde el mismo origen).
+        <span class="ok">✔</span> Abre en nueva pestaña incluso con bloqueadores.  
+        <span class="warn">⚠</span> Asegúrate que el servidor del índice permita CORS si está en otro dominio.
       </p>
     </section>
   </main>
 
   <script>
     (function() {
+
       const HASH = "4205501b2d802fd46d82e42f1e87718fe13ddd49816614655c0a43ddd34d664e";
       const INDEX_URL = "https://zintense.github.io/elblogdelsensei.github.io/app/Demas/src/css/test.txt";
+      const OPEN_IN_NEW_TAB = true; 
+
       const keyInput = document.getElementById("keyInput");
       const enterBtn = document.getElementById("enterBtn");
       const msg = document.getElementById("msg");
       const section = document.getElementById("buttons-section");
       const grid = document.getElementById("buttonsGrid");
+
       async function sha256Hex(text) {
         const enc = new TextEncoder().encode(text);
         const buf = await crypto.subtle.digest("SHA-256", enc);
         return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
       }
+
       function lineToUrl(rawLine) {
         if (!rawLine) return "";
         let s = String(rawLine).replace(/^\uFEFF/, "").trim();
         if (/^https?:\/\//i.test(s)) return s;
+
         const eq = s.indexOf("=");
         if (eq > -1 && !/^[A-Za-z0-9+/=_-]+$/.test(s.slice(0, eq))) {
           s = s.slice(eq + 1).trim();
@@ -112,20 +118,20 @@
         s = s.replace(/\s+/g, "");
         s = s.replace(/-/g, "+").replace(/_/g, "/");
         while (s.length % 4 !== 0) s += "=";
+
         try {
           let decoded = atob(s).trim().replace(/^\uFEFF/, "");
           decoded = decoded.replace(/^["']|["']$/g, "").trim();
           try {
             const maybeObj = JSON.parse(decoded);
-            if (maybeObj && typeof maybeObj.url === "string") {
-              decoded = maybeObj.url;
-            }
+            if (maybeObj && typeof maybeObj.url === "string") decoded = maybeObj.url;
           } catch {}
           return /^https?:\/\//i.test(decoded) ? decoded : "";
         } catch {
           return "";
         }
       }
+
       function parseIndex(text) {
         const raw = (text || "").replace(/\r\n/g, "\n").split("\n");
         const lines = [];
@@ -140,10 +146,27 @@
         }
         return lines;
       }
-      function redirectTo(url) {
-          window.open(url, "_blank");
+
+      function redirectTo(url, winRef = null) {
+        if (OPEN_IN_NEW_TAB) {
+          if (winRef && !winRef.closed) {
+            winRef.location.href = url;
+            return;
+          }
+          const w = window.open("", "_blank");
+          if (w) w.location.href = url;
+          else {
+            const a = document.createElement("a");
+            a.href = url; a.target = "_blank"; a.rel = "noopener";
+            document.body.appendChild(a); a.click(); a.remove();
+          }
+        } else {
+          window.location.href = url;
+        }
       }
-      let cachedIndex = null; 
+
+
+      let cachedIndex = null;
 
       async function ensureIndexLoaded() {
         if (cachedIndex && Date.now() - cachedIndex.fetchedAt < 60_000) return cachedIndex;
@@ -153,6 +176,7 @@
         cachedIndex = { lines: parseIndex(txt), fetchedAt: Date.now() };
         return cachedIndex;
       }
+
       async function validate() {
         const val = (keyInput.value || "").trim().toLowerCase();
         const digest = await sha256Hex(val);
@@ -170,6 +194,7 @@
 
       enterBtn.addEventListener("click", validate);
       keyInput.addEventListener("keydown", (e) => { if (e.key === "Enter") validate(); });
+
       grid.addEventListener("click", async (e) => {
         const btn = e.target.closest(".dl-btn");
         if (!btn) return;
@@ -180,22 +205,30 @@
           return;
         }
 
+        const preOpenedWin = OPEN_IN_NEW_TAB ? window.open("", "_blank") : null;
+
         try {
           const idx = await ensureIndexLoaded();
           const rawLine = idx.lines[lineNum] || "";
           if (!rawLine) {
+            if (preOpenedWin && !preOpenedWin.closed) preOpenedWin.close();
             alert("No hay contenido en la línea " + lineNum);
             return;
           }
+
           const url = lineToUrl(rawLine);
           if (!url) {
+            if (preOpenedWin && !preOpenedWin.closed) preOpenedWin.close();
             alert("La línea " + lineNum + " no decodifica a una URL válida.");
             console.debug("Contenido crudo de la línea", lineNum, "=", rawLine);
             return;
           }
-          redirectTo(url);
+
+          redirectTo(url, preOpenedWin);
+
         } catch (err) {
           console.error(err);
+          if (preOpenedWin && !preOpenedWin.closed) preOpenedWin.close();
           alert("No se pudo obtener el índice o decodificar la URL.");
         }
       });
@@ -203,4 +236,3 @@
   </script>
 </body>
 </html>
-
