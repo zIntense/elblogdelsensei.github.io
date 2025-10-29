@@ -166,7 +166,7 @@
 
       doEncode();
     });
-    // Al cambiar opciones, re-codificar si hay texto
+
     [$optUrlSafe, $optNoPad].forEach(el => el.addEventListener("change", () => {
       if ($in.value) doEncode();
     }));
