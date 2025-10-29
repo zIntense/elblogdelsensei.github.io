@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Descargar TXT desde Google Docs (publicado)</title>
+<style>
+  body { font-family: system-ui; padding: 20px; }
+  button { padding: 10px 14px; font-weight: 700; }
+</style>
+</head>
+<body>
+  <h1>Descargar TXT</h1>
+  <p>Lee el contenido publicado y lo guarda como archivo <code>indice.txt</code>.</p>
+  <button id="go">Guardar como TXT</button>
+
+  <script>
+    const URL_TXT = "https://docs.google.com/document/d/e/2PACX-1vTA1RLKN0a3W83ogCqgZIOy2NSdIGofzmbAIsQ0EJH69w0508ILkJxJ5zJitbZnv-abLAQY-m0tF4AI/pub?output=txt";
+
+    async function descargar() {
+      try {
+        const res = await fetch(URL_TXT, { method: "GET" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const texto = await res.text();
+
+        const blob = new Blob([texto], { type: "text/plain;charset=utf-8" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "indice.txt";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(a.href);
+      } catch (e) {
+        alert("Error al leer/guardar: " + (e.message || e));
+        console.error(e);
+      }
+    }
+
+    document.getElementById("go").addEventListener("click", descargar);
+  </script>
+</body>
+</html>
