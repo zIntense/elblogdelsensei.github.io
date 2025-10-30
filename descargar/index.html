@@ -7,232 +7,301 @@
   <style>
     :root { --bg:#0f172a; --card:#111827; --fg:#e5e7eb; --accent:#22d3ee; --muted:#9ca3af; }
     * { box-sizing: border-box; }
-    body {
-      margin: 0; min-height: 100dvh; display: grid; place-items: center;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
-      background: radial-gradient(1200px 800px at 70% -10%, #1f2937 0%, #0b1022 40%, var(--bg) 100%);
-      color: var(--fg);
-    }
-    .wrap { width: min(920px, 92vw); }
-    .card {
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 16px; padding: 22px; box-shadow: 0 10px 30px rgba(0,0,0,.35);
-      backdrop-filter: blur(6px);
-    }
-    h1 { font-size: clamp(1.2rem, 2.3vw, 1.8rem); margin: 0 0 14px; font-weight: 700; letter-spacing: .2px; }
-    p  { margin: 0 0 14px; color: var(--muted); }
-    .gate { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 12px; }
-    input[type="password"], input[type="text"] {
-      width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,.14);
-      background: #0b1224; color: var(--fg); outline: none;
-    }
-    input::placeholder { color: #6b7280; }
-    .btn {
-      -webkit-tap-highlight-color: transparent;
-      border: 0; border-radius: 12px; padding: 12px 16px; cursor: pointer; font-weight: 700;
-      color: #081018; background: linear-gradient(180deg, #67e8f9, #22d3ee);
-      box-shadow: 0 8px 18px rgba(34,211,238,.25);
-    }
-    .btn[disabled] { opacity: .6; cursor: not-allowed; box-shadow: none; }
-    #buttons-section { display: none; margin-top: 18px; }
-    .grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 12px; margin-top: 14px;
-    }
-    .dl-btn {
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      border: 1px solid rgba(255,255,255,.12); background: #0d162d; color: var(--fg);
-      padding: 12px 14px; border-radius: 14px; cursor: pointer; font-weight: 600;
-      transition: transform .08s ease, border-color .15s ease, background .15s ease;
-    }
-    .dl-btn:hover { transform: translateY(-1px); border-color: rgba(34,211,238,.5); background: #0f1b36; }
-    .tag { font-size: 12px; padding: 2px 8px; border: 1px solid rgba(255,255,255,.14); border-radius: 999px; color: var(--muted); }
-    .ok { color: #10b981; }
-    .warn { color: #f59e0b; }
-    .footer { margin-top: 12px; font-size: 12px; color: var(--muted); }
+    body { margin:0; min-height:100dvh; display:grid; place-items:center; font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif; background:radial-gradient(1200px 800px at 70% -10%, #1f2937 0%, #0b1022 40%, var(--bg) 100%); color:var(--fg); }
+    .wrap { width:min(1000px,94vw); }
+    .card { background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02)); border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:22px; box-shadow:0 10px 30px rgba(0,0,0,.35); backdrop-filter:blur(6px); margin-bottom:14px; }
+    h1 { font-size:clamp(1.2rem,2.3vw,1.8rem); margin:0 0 14px; font-weight:700; letter-spacing:.2px; }
+    h2 { font-size:clamp(1rem,1.8vw,1.2rem); margin:0 0 10px; font-weight:700; }
+    p { margin:0 0 14px; color:var(--muted); }
+    .gate { display:grid; grid-template-columns:1fr auto; gap:10px; margin-top:12px; }
+    input[type="password"], input[type="text"], input[type="url"] { width:100%; padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.14); background:#0b1224; color:var(--fg); outline:none; }
+    textarea { width:100%; min-height:220px; resize:vertical; padding:12px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.14); background:#0b1224; color:var(--fg); outline:none; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace; }
+    input::placeholder { color:#6b7280; }
+    .btn { -webkit-tap-highlight-color:transparent; border:0; border-radius:12px; padding:12px 16px; cursor:pointer; font-weight:700; color:#081018; background:linear-gradient(180deg,#67e8f9,#22d3ee); box-shadow:0 8px 18px rgba(34,211,238,.25); }
+    .btn[disabled]{opacity:.6; cursor:not-allowed; box-shadow:none;}
+    #buttons-section{display:none; margin-top:18px;}
+    .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:12px; margin-top:14px;}
+    .dl-btn{display:flex; align-items:center; justify-content:center; gap:8px; border:1px solid rgba(255,255,255,.12); background:#0d162d; color:var(--fg); padding:12px 14px; border-radius:14px; cursor:pointer; font-weight:600; transition:transform .08s ease, border-color .15s ease, background .15s ease;}
+    .dl-btn:hover{ transform:translateY(-1px); border-color:rgba(34,211,238,.5); background:#0f1b36; }
+    .tag{font-size:12px; padding:2px 8px; border:1px solid rgba(255,255,255,.14); border-radius:999px; color:var(--muted);}
+    .footer{margin-top:12px; font-size:12px; color:var(--muted);}
+    .hidden{display:none!important;}
+    .debug a{color:#22d3ee; text-decoration:underline; word-break:break-all}
   </style>
 </head>
 <body>
   <main class="wrap">
-    <section class="card" id="gate-card" aria-labelledby="title">
-      <h1 id="title">Acceso</h1>
-      <p>Escribe la palabra clave para ver las descargas.</p>
+
+    <section class="card" id="gate-card">
+      <h1>Acceso</h1>
+      <p>Escribe la palabra clave para ver las descargas o entrar como admin.</p>
       <div class="gate">
-        <input id="keyInput" type="password" inputmode="text" autocomplete="off" placeholder="Palabra clave" aria-label="Palabra clave" />
-        <button id="enterBtn" class="btn" type="button">Entrar</button>
+        <input id="keyInput" type="password" placeholder="Palabra clave usuario">
+        <button id="enterBtn" class="btn">Entrar</button>
       </div>
-      <p id="msg" class="footer" role="status" aria-live="polite"></p>
+      <details style="margin-top:8px">
+        <summary>Entrar como <strong>Admin</strong></summary>
+        <div class="gate" style="margin-top:8px">
+          <input id="adminKey" type="password" placeholder="Clave admin">
+          <button id="adminBtn" class="btn">Entrar admin</button>
+        </div>
+      </details>
+      <p id="msg" class="footer"></p>
     </section>
 
-    <section class="card" id="buttons-section" aria-labelledby="dl-title">
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-        <h1 id="dl-title">Descargas</h1>
-        <span class="tag">Cada botón busca su URL</span>
+    <section class="card" id="buttons-section">
+      <h1>Descargas</h1>
+      <p class="footer">Botón 1 = primera línea bajo “Leer:”, etc.</p>
+      <div id="buttonsGrid" class="grid">
+        <button class="dl-btn" data-line="1">⬇️ Botón 1</button>
+        <button class="dl-btn" data-line="2">⬇️ Botón 2</button>
+        <button class="dl-btn" data-line="3">⬇️ Botón 3</button>
       </div>
-      <p class="footer">
-        Sube tu archivo de índice (texto) a cualquier hosting accesible por HTTP/HTTPS. Una línea por botón (Base64) o formato <code>N=Base64</code>.
+      <p id="hint" class="footer debug">
+        <b>Debug:</b>
+        <br>Doc pub (txt): <a id="docLink" target="_blank">abrir</a>
+        &nbsp;|&nbsp; Proxy: <a id="proxyLink" target="_blank">abrir</a>
       </p>
+    </section>
 
-      <div id="buttonsGrid" class="grid" role="list">
-        <button class="dl-btn" role="listitem" data-line="1">⬇️ Pragmatismo</button>
-        <button class="dl-btn" role="listitem" data-line="2">⬇️ Pragmatismo 2</button>
-        <button class="dl-btn" role="listitem" data-line="3">⬇️ Sin uso</button>
+    <section class="card hidden" id="admin-section">
+      <h2>Panel Admin</h2>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <button id="btnLoadIndex" class="btn">Cargar “Leer:”</button>
+        <button id="btnSaveFile" class="btn">Descargar .txt</button>
+        <button id="btnSend" class="btn">Guardar en Google Doc</button>
+        <span id="adminStatus" class="footer"></span>
+      </div>
+      <textarea id="indexEditor" placeholder="Cada línea aquí será escrita DEBAJO de 'Leer:' en el archivo .txt del Drive."></textarea>
+
+      <div style="display:flex; gap:10px; align-items:center; margin-top:12px;">
+        <input id="testLine" type="text" placeholder="N° línea" style="max-width:120px">
+        <button id="btnTest" class="btn">Mostrar línea</button>
+        <span id="testResult" class="footer"></span>
       </div>
 
-      <p id="hint" class="footer">
-        <span class="ok">✔</span> Abre en nueva pestaña incluso con bloqueadores.  
-        <span class="warn">⚠</span> Asegúrate que el servidor del índice permita CORS si está en otro dominio.
-      </p>
+      <div style="display:flex; gap:10px; align-items:center; margin-top:12px;">
+        <input id="urlToB64" type="url" placeholder="https://ejemplo.com/archivo.pdf">
+        <button id="btnUrlToB64" class="btn">URL → base64</button>
+        <span id="urlToB64Result" class="footer"></span>
+      </div>
+
     </section>
   </main>
 
-  <script>
-    (function() {
+<script>
+(function () {
+  const GAS_URL         = "https://script.google.com/macros/s/AKfycbxTrAj34h2uQBV-G4dQvJ9mU6zGvOhS8vBLNXByHiWkz6nh1CXzciRH3tlZLaNjMjE12w/exec";
+  const DOC_TXT_URL     = GAS_URL;
+  const FALLBACK_URL    = "https://r.jina.ai/" + GAS_URL;
+  const ADMIN_SECRET    = "9ced76e0488df6aeb02fe67920959ffe2a7d5d0cf4ceeaa61d386a9760ccef7b";
+  const HASH_USER       = "13282bc8615f8968640c73e39781045b4e004604319e7f6ae231e395120438cb";
+  const HASH_ADMIN      = "0194325ef1364b0c977a5a8dcf005333217890a977c48f594c7392c3a0eec732";
+  const OPEN_IN_NEW_TAB = true;
 
-      const HASH = "4205501b2d802fd46d82e42f1e87718fe13ddd49816614655c0a43ddd34d664e";
-      const INDEX_URL = "https://zintense.github.io/elblogdelsensei.github.io/app/Demas/src/css/test.txt";
-      const OPEN_IN_NEW_TAB = true; 
+  const downloadsSection = document.getElementById("buttons-section");
+  const grid             = document.getElementById("buttonsGrid");
+  const btnLoadIndex     = document.getElementById("btnLoadIndex");
+  const btnSaveFile      = document.getElementById("btnSaveFile");
+  const btnSend          = document.getElementById("btnSend");
+  const indexEditor      = document.getElementById("indexEditor");
+  const adminStatus      = document.getElementById("adminStatus");
+  const keyInput         = document.getElementById("keyInput");
+  const enterBtn         = document.getElementById("enterBtn");
+  const adminKey         = document.getElementById("adminKey");
+  const adminBtn         = document.getElementById("adminBtn");
+  const adminSection     = document.getElementById("admin-section");
+  const msg              = document.getElementById("msg");
+  const testLine         = document.getElementById("testLine");
+  const btnTest          = document.getElementById("btnTest");
+  const testResult       = document.getElementById("testResult");
+  const urlToB64         = document.getElementById("urlToB64");
+  const btnUrlToB64      = document.getElementById("btnUrlToB64");
+  const urlToB64Result   = document.getElementById("urlToB64Result");
 
-      const keyInput = document.getElementById("keyInput");
-      const enterBtn = document.getElementById("enterBtn");
-      const msg = document.getElementById("msg");
-      const section = document.getElementById("buttons-section");
-      const grid = document.getElementById("buttonsGrid");
+  document.getElementById("docLink").href   = DOC_TXT_URL;
+  document.getElementById("proxyLink").href = FALLBACK_URL;
 
-      async function sha256Hex(text) {
-        const enc = new TextEncoder().encode(text);
-        const buf = await crypto.subtle.digest("SHA-256", enc);
-        return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
-      }
+  async function sha256Hex(t){
+    const e=new TextEncoder().encode(t);
+    const n=await crypto.subtle.digest("SHA-256",e);
+    return Array.from(new Uint8Array(n)).map(b=>b.toString(16).padStart(2,"0")).join("");
+  }
+  function setStatus(el,txt){ el.textContent = txt || ""; }
 
-      function lineToUrl(rawLine) {
-        if (!rawLine) return "";
-        let s = String(rawLine).replace(/^\uFEFF/, "").trim();
-        if (/^https?:\/\//i.test(s)) return s;
+  function stripLeer(text) {
+    if (!text) return "";
+    const lines = text.replace(/\r\n/g,"\n").split("\n");
+    if (lines.length && /^leer:\s*$/i.test(lines[0].trim())) {
+      return lines.slice(1).join("\n");
+    }
+    return text;
+  }
 
-        const eq = s.indexOf("=");
-        if (eq > -1 && !/^[A-Za-z0-9+/=_-]+$/.test(s.slice(0, eq))) {
-          s = s.slice(eq + 1).trim();
-        }
-        s = s.replace(/\s+/g, "");
-        s = s.replace(/-/g, "+").replace(/_/g, "/");
-        while (s.length % 4 !== 0) s += "=";
+  function extractLinesUnderLeer(fullText){
+    if (!fullText) return [];
+    const txt = stripLeer(fullText);          
+    const rawLines = txt.split("\n");
+    const out=[];
+    for(const ln of rawLines){
+      const t=ln.trim();
+      if(!t) continue;
+      out.push(t);
+    }
+    return out;
+  }
 
+  function decodeLineToUrl(raw) {
+    if (!raw) return "";
+    const s = raw.trim();
+    if (/^https?:\/\//i.test(s)) return s; 
+    try {
+      let d = s.replace(/-/g,"+").replace(/_/g,"/");
+      while (d.length % 4 !== 0) d += "=";
+      d = atob(d).trim().replace(/^["']|["']$/g,"");
+      if (/^https?:\/\//i.test(d)) return d;
+      return d; 
+    } catch {
+      return "";
+    }
+  }
+
+  function loadFromGasJSONP() {
+    return new Promise((resolve, reject) => {
+      const cbName = "jsonp_cb_" + Math.random().toString(36).slice(2);
+      const s = document.createElement("script");
+      window[cbName] = (data) => {
         try {
-          let decoded = atob(s).trim().replace(/^\uFEFF/, "");
-          decoded = decoded.replace(/^["']|["']$/g, "").trim();
-          try {
-            const maybeObj = JSON.parse(decoded);
-            if (maybeObj && typeof maybeObj.url === "string") decoded = maybeObj.url;
-          } catch {}
-          return /^https?:\/\//i.test(decoded) ? decoded : "";
-        } catch {
-          return "";
-        }
-      }
-
-      function parseIndex(text) {
-        const raw = (text || "").replace(/\r\n/g, "\n").split("\n");
-        const lines = [];
-        lines[0] = null;
-        for (let i = 0; i < raw.length; i++) {
-          let line = raw[i].trim();
-          if (!line || line.startsWith("#") || line.startsWith("//")) {
-            lines.push("");
-            continue;
+          if (data && data.ok && typeof data.text === "string") {
+            resolve(data.text);
+          } else if (typeof data === "string") {
+            resolve(data);
+          } else {
+            reject(new Error("respuesta inválida de GAS"));
           }
-          lines.push(line);
+        } finally {
+          delete window[cbName];
+          s.remove();
         }
-        return lines;
+      };
+      s.src = GAS_URL + "?jsonp=1&callback=" + cbName;
+      s.onerror = () => {
+        delete window[cbName];
+        s.remove();
+        reject(new Error("Error cargando JSONP"));
+      };
+      document.body.appendChild(s);
+    });
+  }
+
+  enterBtn.addEventListener("click", async ()=>{
+    const val=(keyInput.value||"").trim();
+    const dig=await sha256Hex(val);
+    if(dig===HASH_USER){ downloadsSection.style.display="block"; msg.textContent="Acceso concedido."; }
+    else msg.textContent="Palabra incorrecta.";
+  });
+  keyInput.addEventListener("keydown", e=>{ if(e.key==="Enter") enterBtn.click(); });
+
+  adminBtn.addEventListener("click", async ()=>{
+    const val=(adminKey.value||"").trim();
+    const dig=await sha256Hex(val);
+    if(dig===HASH_ADMIN){ adminSection.classList.remove("hidden"); setStatus(adminStatus,"Admin OK."); }
+    else setStatus(adminStatus,"Clave admin incorrecta.");
+  });
+  adminKey.addEventListener("keydown", e=>{ if(e.key==="Enter") adminBtn.click(); });
+
+  grid.addEventListener("click", async (e)=>{
+    const btn = e.target.closest(".dl-btn"); if(!btn) return;
+    const n = parseInt(btn.getAttribute("data-line"),10);
+    try{
+      let txt;
+      try { txt = await loadFromGasJSONP(); }
+      catch { const r=await fetch(DOC_TXT_URL); txt=await r.text(); }
+      const lines = extractLinesUnderLeer(txt);
+      const raw   = (lines[n-1]||"").trim();
+      if(!raw){ alert("Sin contenido en la línea "+n); return; }
+
+      const url = decodeLineToUrl(raw);
+      if(!url || !/^https?:\/\//i.test(url)){
+        alert("La línea "+n+" no es URL válida.");
+        return;
       }
+      if(OPEN_IN_NEW_TAB) window.open(url,"_blank"); else location.href=url;
+    }catch(err){
+      console.error(err);
+      alert("No se pudo leer las líneas: "+(err.message||""));
+    }
+  });
 
-      function redirectTo(url, winRef = null) {
-        if (OPEN_IN_NEW_TAB) {
-          if (winRef && !winRef.closed) {
-            winRef.location.href = url;
-            return;
-          }
-          const w = window.open("", "_blank");
-          if (w) w.location.href = url;
-          else {
-            const a = document.createElement("a");
-            a.href = url; a.target = "_blank"; a.rel = "noopener";
-            document.body.appendChild(a); a.click(); a.remove();
-          }
-        } else {
-          window.location.href = url;
-        }
+  btnLoadIndex.addEventListener("click", async ()=>{
+    try{
+      const txt = await loadFromGasJSONP();
+      const only = stripLeer(txt);
+      indexEditor.value = only;
+      setStatus(adminStatus,"Líneas cargadas ✔ (desde GAS)");
+    }catch(e){
+      console.warn(e);
+      try {
+        const r = await fetch(DOC_TXT_URL);
+        const t = await r.text();
+        indexEditor.value = stripLeer(t);
+        setStatus(adminStatus,"Líneas cargadas ✔ (fallback)");
+      } catch(e2){
+        setStatus(adminStatus,"No se pudo cargar: "+e2.message);
       }
+    }
+  });
 
+  btnSaveFile.addEventListener("click", ()=>{
+    const blob=new Blob([indexEditor.value||""],{type:"text/plain;charset=utf-8"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="leer_lines.txt";
+    a.click();
+    setStatus(adminStatus,"Descargado leer_lines.txt ✔");
+  });
 
-      let cachedIndex = null;
-
-      async function ensureIndexLoaded() {
-        if (cachedIndex && Date.now() - cachedIndex.fetchedAt < 60_000) return cachedIndex;
-        const res = await fetch(INDEX_URL, { mode: "cors" });
-        if (!res.ok) throw new Error("No se pudo leer el índice (" + res.status + ")");
-        const txt = await res.text();
-        cachedIndex = { lines: parseIndex(txt), fetchedAt: Date.now() };
-        return cachedIndex;
-      }
-
-      async function validate() {
-        const val = (keyInput.value || "").trim().toLowerCase();
-        const digest = await sha256Hex(val);
-        if (digest === HASH) {
-          section.style.display = "block";
-          msg.textContent = "Acceso concedido.";
-          keyInput.disabled = true;
-          enterBtn.disabled = true;
-          const firstBtn = grid.querySelector(".dl-btn");
-          if (firstBtn) firstBtn.focus();
-        } else {
-          msg.textContent = "Palabra incorrecta.";
-        }
-      }
-
-      enterBtn.addEventListener("click", validate);
-      keyInput.addEventListener("keydown", (e) => { if (e.key === "Enter") validate(); });
-
-      grid.addEventListener("click", async (e) => {
-        const btn = e.target.closest(".dl-btn");
-        if (!btn) return;
-
-        const lineNum = parseInt(btn.getAttribute("data-line"), 10);
-        if (!Number.isInteger(lineNum) || lineNum <= 0) {
-          alert("Botón sin 'data-line' válido.");
-          return;
-        }
-
-        const preOpenedWin = OPEN_IN_NEW_TAB ? window.open("", "_blank") : null;
-
-        try {
-          const idx = await ensureIndexLoaded();
-          const rawLine = idx.lines[lineNum] || "";
-          if (!rawLine) {
-            if (preOpenedWin && !preOpenedWin.closed) preOpenedWin.close();
-            alert("No hay contenido en la línea " + lineNum);
-            return;
-          }
-
-          const url = lineToUrl(rawLine);
-          if (!url) {
-            if (preOpenedWin && !preOpenedWin.closed) preOpenedWin.close();
-            alert("La línea " + lineNum + " no decodifica a una URL válida.");
-            console.debug("Contenido crudo de la línea", lineNum, "=", rawLine);
-            return;
-          }
-
-          redirectTo(url, preOpenedWin);
-
-        } catch (err) {
-          console.error(err);
-          if (preOpenedWin && !preOpenedWin.closed) preOpenedWin.close();
-          alert("No se pudo obtener el índice o decodificar la URL.");
-        }
+  btnSend.addEventListener("click", async ()=>{
+    setStatus(adminStatus,"Enviando…");
+    const txtToSend = "Leer:\n" + (indexEditor.value || "");
+    try{
+      await fetch(GAS_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type":"text/plain;charset=utf-8" },
+        body: txtToSend
       });
-    })();
-  </script>
+      setStatus(adminStatus,"Enviado ✔ (usa Cargar para ver si ya está)");
+    }catch(e){
+      console.error(e);
+      setStatus(adminStatus,"No se pudo enviar: "+e.message);
+    }
+  });
+
+  btnTest.addEventListener("click", ()=>{
+    const n=parseInt(testLine.value,10);
+    if(!Number.isInteger(n)||n<=0){ setStatus(testResult,"N inválido."); return; }
+    const arr=(indexEditor.value||"").split(/\r?\n/);
+    const raw=(arr[n-1]||"").trim();
+    if(!raw){ setStatus(testResult,`Línea ${n} vacía.`); return; }
+    const url = decodeLineToUrl(raw);
+    if (url) setStatus(testResult, `Línea ${n} → ${url}`);
+    else setStatus(testResult, `Línea ${n} no se pudo decodificar.`);
+  });
+
+  btnUrlToB64.addEventListener("click", ()=>{
+    const u = (urlToB64.value || "").trim();
+    if (!u) { setStatus(urlToB64Result, "Ingresa URL"); return; }
+    try {
+      new URL(u); 
+      const b = btoa(u);
+      setStatus(urlToB64Result, b);
+    } catch {
+      setStatus(urlToB64Result, "URL inválida");
+    }
+  });
+
+})();
+</script>
 </body>
 </html>
