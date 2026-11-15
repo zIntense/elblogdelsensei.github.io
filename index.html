@@ -46,11 +46,7 @@
         <section class="empty" id="empty" hidden>
             <div>✳</div>
             <h3>No hay destinos para mostrar.</h3>
-            <p>Cuando agregues enlaces al archivo <code>links.json</code>, aparecerán aquí.</p>
-        </section>
-
-        <section class="load-error" id="loadError" hidden>
-            No se pudo cargar <code>links.json</code>. Comprueba que el archivo exista y que su formato JSON sea válido.
+            <p>Agrega tus destinos en la sección <code>links-data</code> del propio archivo HTML.</p>
         </section>
 
         <footer>
@@ -59,6 +55,103 @@
         </footer>
     </main>
 
-    <script src="app.js"></script>
+    <script type="application/json" id="links-data">
+[
+    {
+        "name": "Axis",
+        "url": "https://example.com",
+        "description": "Mi centro de control personal",
+        "icon": "A"
+    },
+    {
+        "name": "Notion",
+        "url": "https://www.notion.so",
+        "description": "Notas, ideas y organización",
+        "icon": "N"
+    },
+    {
+        "name": "GitHub",
+        "url": "https://github.com",
+        "description": "Código y proyectos",
+        "icon": "⌘"
+    },
+    {
+        "name": "ChatGPT",
+        "url": "https://chatgpt.com",
+        "description": "Ideas, investigación y asistencia",
+        "icon": "✳"
+    },
+    {
+        "name": "YouTube",
+        "url": "https://www.youtube.com",
+        "description": "Aprender y desconectar",
+        "icon": "▶"
+    },
+    {
+        "name": "Google Drive",
+        "url": "https://drive.google.com",
+        "description": "Documentos y archivos",
+        "icon": "D"
+    }
+]
+    </script>
+
+    <script>
+        const grid = document.getElementById("grid");
+        const count = document.getElementById("count");
+        const empty = document.getElementById("empty");
+
+        const escapeHTML = value => String(value ?? "").replace(/[&<>"']/g, char => ({
+            "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+        }[char]));
+
+        function validLink(item) {
+            if (!item || typeof item !== "object") return false;
+            if (typeof item.name !== "string" || !item.name.trim()) return false;
+            if (typeof item.url !== "string") return false;
+            try {
+                return ["http:", "https:"].includes(new URL(item.url).protocol);
+            } catch {
+                return false;
+            }
+        }
+
+        function renderLinks() {
+            const links = JSON.parse(document.getElementById("links-data").textContent);
+            if (!Array.isArray(links)) throw new Error("links-data debe contener una lista JSON.");
+            const safeLinks = links.filter(validLink);
+            count.textContent = safeLinks.length;
+
+            grid.innerHTML = safeLinks.map(item => {
+                const name = escapeHTML(item.name.trim());
+                const description = escapeHTML(item.description || item.url);
+                const icon = escapeHTML(item.icon || item.name.trim().charAt(0).toUpperCase() || "↗");
+                const url = escapeHTML(new URL(item.url).href);
+                return `
+                    <article class="card">
+                        <div class="card-top">
+                            <div class="site-icon">${icon}</div>
+                            <span class="external-mark" aria-hidden="true">↗</span>
+                        </div>
+                        <h3 class="card-title">${name}</h3>
+                        <p class="card-desc">${description}</p>
+                        <div class="card-bottom">
+                            <span class="tag">DESTINO</span>
+                            <a class="open" href="${url}" target="_blank" rel="noopener noreferrer">ABRIR DESTINO ↗</a>
+                        </div>
+                    </article>`;
+            }).join("");
+            empty.hidden = safeLinks.length !== 0;
+        }
+
+        try {
+            renderLinks();
+        } catch (error) {
+            console.error("No se pudieron mostrar los enlaces:", error);
+            count.textContent = "0";
+            grid.innerHTML = "";
+            empty.hidden = false;
+        }
+    </script>
 </body>
 </html>
