@@ -1,14 +1,32 @@
 [
+   {
+    "name": "The Vault",
+    "url": "https://zintense.github.io/vault/",
+    "description": "Vault",
+    "icon": "V"
+  }
   {
-    "name": "Axis",
-    "url": "https://tusitio.com",
-    "description": "Mi centro de control personal",
-    "icon": "A"
+    "name": "Calculadora",
+    "url": "https://zintense.github.io/elblogdelsensei.github.io/calculadora/",
+    "description": "Calcular",
+    "icon": "*"
   },
   {
-    "name": "GitHub",
-    "url": "https://github.com",
-    "description": "Repositorios y proyectos",
-    "icon": "G"
+    "name": "Generar QR",
+    "url": "https://zintense.github.io/elblogdelsensei.github.io/qr/",
+    "description": "QRs",
+    "icon": "QR"
+  }
+   {
+    "name": "Descargas",
+    "url": "https://zintense.github.io/elblogdelsensei.github.io/download/",
+    "description": "Descargar",
+    "icon": "D"
+  }
+  {
+    "name": "Archive",
+    "url": "https://zintense.github.io/elblogdelsensei.github.io/descargar/",
+    "description": "Archivos",
+    "icon": "A"
   }
 ]
